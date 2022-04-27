@@ -193,6 +193,8 @@ def reconstruct(I, Iresized, Yr, lp_threshold):
 
     final_labels = nms(labels, 0.1)
     final_labels_frontal = nms(labels_frontal, 0.1)
+    if final_labels_frontal == []:
+        return None, [], None
 
     # LP size and type
     out_size, lp_type = (two_lines, 2) if ((final_labels_frontal[0].wh()[0] / final_labels_frontal[0].wh()[1]) < 1.7) else (one_line, 1)
