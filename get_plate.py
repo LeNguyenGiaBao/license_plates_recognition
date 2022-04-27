@@ -5,14 +5,8 @@ import glob
 from openvino.runtime import Core
 from utils import * 
 
-# Load the model 
-ie = Core()
-model = ie.read_model(model="./plate_detection_model/saved_model.xml")
-compiled_model = ie.compile_model(model=model, device_name="CPU")
-input_layer_ir = next(iter(compiled_model.inputs))
 
-
-def get_plate(image):
+def get_plate(image, compiled_model, input_layer_ir):
     processed_image, resized_image = preprocess_image(image)
 
     # Create inference request
@@ -35,11 +29,17 @@ def get_plate(image):
     return None
 
 if __name__=="__main__":
-    dataset = glob.glob('./data/*.png')
+    # Load the model 
+    ie = Core()
+    model = ie.read_model(model="./plate_detection_model/saved_model.xml")
+    compiled_model = ie.compile_model(model=model, device_name="CPU")
+    input_layer_ir = next(iter(compiled_model.inputs))
+
+    dataset = glob.glob('./private_data/*.png')
     start_time = time.time()
     for i in dataset:
         img = cv2.imread(i)
-        plate = get_plate(img)
+        plate = get_plate(img, compiled_model, input_layer_ir)
         if plate is not None:
             print(plate.shape)
     end_time = time.time()
