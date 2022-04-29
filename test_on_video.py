@@ -13,19 +13,21 @@ ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log = False) # need to run o
 
 video_path = './private_data/00000000044000201.mp4'
 video = cv2.VideoCapture(video_path)
+index = 0
 
 while video.isOpened():
     ret, frame = video.read()
+    frame = frame[300:800, 700:1200]
     # index += 1
     # if index % 2 != 0:
     #     continue 
     # print(frame.shape)
-    frame = frame[300:800, 700:1200]
     if ret:
         plate = get_plate(frame, compiled_model, input_layer_ir)
         if plate is not None:
-            cv2.imwrite('test.jpg', plate)
+            cv2.imshow('plate', plate)
             plate_text = read_plate(plate, ocr)
+            print(plate_text)
             cv2.putText(frame, plate_text, (100,100), fontFace=0, fontScale=1, color=(0,255,0), thickness=2, lineType=cv2.LINE_AA)
 
         cv2.imshow('1', frame)
