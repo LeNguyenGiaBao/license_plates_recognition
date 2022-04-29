@@ -1,5 +1,11 @@
 # license_plates_recognition
 
+#### Update 22_04_29
+- crop plate into 2 parts -> ocr time decreases 0.25s -> 0.05~0.1s (because ocr model doesn't detect text)
+- OCR Time: 0.05 ~ 0.1s
+- Total time in one image: ~0.2s
+- Time by call API to server: ~0.25s (client and server in the same device , i5 8250, run on cpu)
+
 #### Update 22_04_28
 - add api, default run on localhost:8100
 - add function to test on video. Change path of video and see the result
