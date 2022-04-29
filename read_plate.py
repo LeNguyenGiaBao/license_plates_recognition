@@ -5,18 +5,22 @@ from openvino.runtime import Core
 from paddleocr import PaddleOCR
 from get_plate import get_plate
 
-
 def read_plate(plate, ocr_model):
     # https://github.com/PaddlePaddle/PaddleOCR/blob/95c670faf6cf4551c841764cde43a4f4d9d5e634/paddleocr.py#L345
-    output = ocr_model.ocr(plate, cls=True)
+    output = ocr_model.ocr(plate, cls=True, det=False)
     result = ''
 
-    for line in output:
-        bbox = line[0]
-        plate_text, plate_score = line[1]
-        result += " " + plate_text
+    # Split plate_image into 2 parts (to skip paddle detector) 
+    h, w, _ = plate.shape
+    cropped_plate = plate[:h//2,:,:]
+    plate_text = ocr_model.ocr(cropped_plate, cls=False, det=False)[0][0]
+    result += plate_text + " "  
 
-    return result[1:]
+    cropped_plate = plate[h//2:,:,:]
+    plate_text = ocr_model.ocr(cropped_plate, cls=False, det=False)[0][0]
+    result += plate_text
+
+    return result
 
 if __name__=="__main__":
     # Load the model 
@@ -30,11 +34,21 @@ if __name__=="__main__":
     # to switch the language model in order.
     ocr = PaddleOCR(use_angle_cls=True, lang='en') # need to run only once to download and load model into memory
 
-    img = cv2.imread('./private_data/0028802154_134931_PLATE_6.png')
-    plate = get_plate(img, compiled_model, input_layer_ir)
-    if plate is not None:
-        plate_text = read_plate(plate, ocr)
-        print(plate_text)
+    time_0 = time.time()
+    for i in glob.glob('./private_data/*.png'):
+        # img = cv2.imread('./private_data/0028802154_134931_PLATE_7.png')
+        img = cv2.imread(i)
+        start_time = time.time()
+        plate = get_plate(img, compiled_model, input_layer_ir)
+        if plate is not None:
+            plate_text = read_plate(plate, ocr)
+            end_time = time.time()
+            print(end_time - start_time)
+            print(plate_text)
+
+
+    print(time.time() - time_0)
+
 
 
 
