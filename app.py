@@ -76,9 +76,9 @@ async def plate(name_cam: str = Form(""), image: UploadFile = File(None)):
         return jsonable_encoder({
                 "code": 201,
                 "error_code": 0,
-                "msg": e
+                "msg": str(e)
             })
 
 if __name__ == "__main__":
     # run API
-    uvicorn.run('app:app', host="0.0.0.0", port=8100, reload=True)
+    uvicorn.run('app:app', host="0.0.0.0", port=8400, reload=True)
