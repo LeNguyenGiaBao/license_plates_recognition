@@ -1,5 +1,13 @@
 # license_plates_recognition
 
+#### Update 22_05_07
+- Change port to localhost:8400
+- Test with only recognition model [paddle](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.4/doc/doc_en/inference_ppocr_en.md#1-lightweight-chinese-recognition-model-inference). 
+- Inference time with 1 plate: 
+    - Only recognition model: ~0.05s
+    - Use PaddleOCR interface: ~0.07s
+
+
 #### Update 22_04_29
 - crop plate into 2 parts -> ocr time decreases 0.25s -> 0.05~0.1s (because ocr model doesn't detect text)
 - OCR Time: 0.05 ~ 0.1s
@@ -16,6 +24,22 @@
 
 ### Fail case:
 - B -> 3: because glare
+
+### API for C#
+Use: ```python app.py```  
+Url: ```http://127.0.0.1:8400/plate/```  
+```
+var client = new RestClient("http://0.0.0.0:8400/plate/");
+client.Timeout = -1;
+var request = new RestRequest(Method.POST);
+request.AddParameter("name_cam", "");
+request.AddFile("image", "path_of_image");
+IRestResponse response = client.Execute(request);
+Console.WriteLine(response.Content);
+```
+Input:
+- name_cam: str
+- image: file
 
 
 ### Result Format
