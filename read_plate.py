@@ -15,11 +15,13 @@ def read_plate(plate, ocr_model):
     cropped_plate = plate[:h//2,:,:]
     # cv2.imwrite('plate_above.jpg', cropped_plate)
     plate_text = ocr_model.ocr(cropped_plate, cls=False, det=False)[0][0]
-    result += plate_text + " "  
+    plate_text = ''.join(e for e in plate_text if e.isalnum())
+    result += plate_text
 
     cropped_plate = plate[h//2:,:,:]
     # cv2.imwrite('plate_below.jpg', cropped_plate)
     plate_text = ocr_model.ocr(cropped_plate, cls=False, det=False)[0][0]
+    plate_text = ''.join(e for e in plate_text if e.isalnum())
     result += plate_text
 
     return result
