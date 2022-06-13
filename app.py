@@ -57,6 +57,13 @@ async def plate(name_cam: str = Form(""), image: str = Form("")):
             }) 
 
         plate_text = read_plate(plate, ocr)
+        if plate_text is None:
+            return jsonable_encoder({
+                "code": 201,
+                "error_code": 3,
+                "msg": "Plate not found"
+            })
+            
         print(plate_text)
 
         return jsonable_encoder({
