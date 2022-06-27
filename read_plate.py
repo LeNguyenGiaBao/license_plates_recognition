@@ -1,6 +1,7 @@
 import cv2 
 import time
-import glob 
+import glob
+
 from openvino.runtime import Core
 from paddleocr import PaddleOCR
 from get_plate import get_plate
@@ -18,16 +19,101 @@ def read_plate(plate, ocr_model):
     if plate_text == "":
         return None 
         
-    plate_text = ''.join(e for e in plate_text if e.isalnum())
+    plate_text = post_process_first_plate(plate_text)
     result += plate_text
 
     cropped_plate = plate[h//2:,:,:]
     # cv2.imwrite('plate_below.jpg', cropped_plate)
     plate_text = ocr_model.ocr(cropped_plate, cls=False, det=False)[0][0]
-    plate_text = ''.join(e for e in plate_text if e.isalnum())
+    plate_text = post_process_second_plate(plate_text)
     result += plate_text
 
     return result
+
+def post_process_first_plate(plate_text):
+    # format: 
+        # 60A1 (>50cc) 
+        # or 60AB (<50cc) 
+        # or 41MD1 (electric motobike)
+    plate_text = plate_text.upper()
+    plate_text = ''.join(e for e in plate_text if e.isalnum())
+    if len(plate_text)==4:
+        a, b, c, d = plate_text
+        a = char2num(a)
+        b = char2num(b)
+        c = num2char(c)
+        d = char2num(d) # temp fix it to char (>50cc)
+        plate_text = a+b+c+d
+
+    elif len(plate_text)==5:
+        a, b, c, d, e = plate_text
+        a = char2num(a)
+        b = char2num(b)
+        c = num2char(c)
+        d = num2char(d) 
+        e = char2num(e)
+        plate_text = a+b+c+d+e
+
+    return plate_text
+    
+def post_process_second_plate(plate_text):
+    # format: all number
+    plate_text = plate_text.upper()
+    plate_text = ''.join(char2num(e) for e in plate_text if e.isalnum())
+
+    return plate_text
+
+def num2char(num):
+    map_num2char = {
+        '0':'D',
+        '1':'T',
+        '2':'Z', 
+        '3':'B',
+        '4':'A',
+        '5':'S',
+        '6':'G',
+        '7':'T',
+        '8':'B',
+        # '9':'P'
+    }
+    if num in map_num2char:
+        return map_num2char[num]
+    
+    return num
+
+def char2num(char):
+    map_char2num = {
+        'A':'4',
+        'B':'8',
+        'C':'0',
+        'D':'0',
+        # 'E':'E',
+        # 'F':'F',
+        'G':'6',
+        'H':'4',
+        'I':'1',
+        'J':'1',
+        # 'K':'K',
+        'L':'4',
+        # 'M':'M',
+        # 'N':'N',
+        'O':'0',
+        'P':'6',
+        'Q':'0',
+        'R':'8',
+        'S':'5',
+        'T':'1',
+        'U':'0',
+        'V':'0',
+        # 'X':'M',
+        'Y':'1',
+        'Z':'2',
+        'W':'W',
+    }
+    if char in map_char2num:
+        return map_char2num[char]
+    
+    return char
 
 
 if __name__=="__main__":
@@ -74,7 +160,6 @@ if __name__=="__main__":
 
     # end_time = time.time()
     # print('time:', end_time - start_time)  # 2.55 seconds for 9 images
-
 
 
 
