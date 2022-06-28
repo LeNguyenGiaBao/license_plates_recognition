@@ -19,18 +19,21 @@ def read_plate(plate, ocr_model):
     if plate_text == "":
         return None 
         
-    plate_text = post_process_first_plate(plate_text)
+    plate_text = post_process_first_line(plate_text)
     result += plate_text
 
     cropped_plate = plate[h//2:,:,:]
     # cv2.imwrite('plate_below.jpg', cropped_plate)
     plate_text = ocr_model.ocr(cropped_plate, cls=False, det=False)[0][0]
-    plate_text = post_process_second_plate(plate_text)
+    if plate_text == "":
+        return None 
+        
+    plate_text = post_process_second_line(plate_text)
     result += plate_text
 
     return result
 
-def post_process_first_plate(plate_text):
+def post_process_first_line(plate_text):
     # format: 
         # 60A1 (>50cc) 
         # or 60AB (<50cc) 
@@ -42,7 +45,6 @@ def post_process_first_plate(plate_text):
         a = char2num(a)
         b = char2num(b)
         c = num2char(c)
-        d = char2num(d) # temp fix it to char (>50cc)
         plate_text = a+b+c+d
 
     elif len(plate_text)==5:
@@ -56,7 +58,7 @@ def post_process_first_plate(plate_text):
 
     return plate_text
     
-def post_process_second_plate(plate_text):
+def post_process_second_line(plate_text):
     # format: all number
     plate_text = plate_text.upper()
     plate_text = ''.join(char2num(e) for e in plate_text if e.isalnum())
