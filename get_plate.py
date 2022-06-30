@@ -3,10 +3,23 @@ import cv2
 import math
 import time
 import glob
+import os 
+from datetime import date, datetime
 from openvino.runtime import Core
 from utils import * 
+
 DETECT_THRESHOLD = 0.56 # IMPORTANT PARAM!!!
 MIN_PLATE_DIAGONAL = 90 # IMPORTANT PARAM!!! 
+IS_SAVE_PLATE = True
+
+if IS_SAVE_PLATE:
+    today = date.today()
+    today = '20' + today.strftime('%y%m%d')
+    dir_path = r'D:\ParkingAppData\{}\plate_image'.format(today)
+
+    if not os.path.exists(dir_path): 
+        os.mkdir(dir_path)
+
 
 def get_plate(image, compiled_model, input_layer_ir):
     processed_image, resized_image = preprocess_image(image)
@@ -32,6 +45,12 @@ def get_plate(image, compiled_model, input_layer_ir):
             
         plate = cv2.cvtColor(plate_image[0],cv2.COLOR_RGB2BGR)
 
+        if IS_SAVE_PLATE:
+            now = datetime.now() 
+            now = now.strftime("%H_%M_%S_%f")
+            path = os.path.join(dir_path, now+'.jpg')
+            cv2.imwrite(path, plate)
+            
         return plate 
 
     return None
