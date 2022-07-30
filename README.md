@@ -1,5 +1,11 @@
 # license_plates_recognition
 
+#### Update 22_07_17
+- test with text detection:
+    - no detection: 0.0580617875394309 s/img
+    - has detection: 0.07414934519306778 s/img 
+    - ->deviant: 0.016089 s/img
+    - -> USE DETECTION
 #### Update 22_05_07
 - Change port to localhost:8400
 - Test with only recognition model [paddle](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.4/doc/doc_en/inference_ppocr_en.md#1-lightweight-chinese-recognition-model-inference). 
