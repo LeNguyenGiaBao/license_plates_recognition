@@ -11,6 +11,32 @@ def read_plate(plate, ocr_model):
     # output = ocr_model.ocr(plate, cls=True, det=False)
     result = ''
 
+    plate_text = ocr_model.ocr(plate, cls=False, det=True)
+    '''
+    plate_text = [[[[40.0, 13.0], [241.0, 7.0], [244.0, 89.0], [42.0, 96.0]], ('29-H1', 0.9755630493164062)], [[[16.0, 106.0], [268.0, 95.0], [271.0, 177.0], [19.0, 189.0]], ('435.32', 0.905677080154419)]]
+    '''
+    print(plate_text)
+    if len(plate_text) == 2:
+        first_line = plate_text[0][1][0]
+        second_line = plate_text[1][1][0]
+
+        first_line_text = post_process_first_line(first_line)
+        second_line_text = post_process_second_line(second_line)
+
+        result = first_line_text + second_line_text
+    elif len(plate_text) == 1:
+        second_line = plate_text[0][1][0]
+        second_line_text = post_process_second_line(second_line)
+
+        result = second_line_text
+
+    if len(result) < 8:
+        return None 
+
+    return result
+
+def read_plate_no_detection(plate, ocr_model):
+    result = ''
     # Split plate_image into 2 parts (to skip paddle detector) 
     h, w, _ = plate.shape
     cropped_plate = plate[:h//2,:,:]
@@ -18,7 +44,6 @@ def read_plate(plate, ocr_model):
     plate_text = ocr_model.ocr(cropped_plate, cls=False, det=False)[0][0]
     if plate_text == "":
         return None 
-        
     plate_text = post_process_first_line(plate_text)
     result += plate_text
 
@@ -31,7 +56,10 @@ def read_plate(plate, ocr_model):
     plate_text = post_process_second_line(plate_text)
     result += plate_text
 
-    return result
+    if len(result) < 8:
+        return None 
+
+    return result 
 
 def post_process_first_line(plate_text):
     # format: 

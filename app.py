@@ -7,7 +7,7 @@ import uvicorn
 from openvino.runtime import Core
 from paddleocr import PaddleOCR
 from get_plate import get_plate
-from read_plate import read_plate
+from read_plate import read_plate, read_plate_no_detection
 import base64
 
 # Load the model 
@@ -16,7 +16,7 @@ model = ie.read_model(model="./plate_detection_model/saved_model.xml")
 compiled_model = ie.compile_model(model=model, device_name="CPU")
 input_layer_ir = next(iter(compiled_model.inputs))
 
-ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log = False, use_gpu=True) # need to run only once to download and load model into memory
+ocr = PaddleOCR(use_angle_cls=False, lang='en', show_log = False, use_gpu=True) # need to run only once to download and load model into memory
 
 
 # Fast API
@@ -56,12 +56,12 @@ async def plate(name_cam: str = Form(""), image: str = Form("")):
                 "msg": "Plate not found"
             }) 
 
-        plate_text = read_plate(plate, ocr)
+        plate_text = read_plate_no_detection(plate, ocr)
         if plate_text is None:
             return jsonable_encoder({
                 "code": 201,
-                "error_code": 3,
-                "msg": "Plate not found"
+                "error_code": 4,
+                "msg": "Plate not recognize" # NEED MODIFY
             })
             
         print(plate_text)
@@ -114,11 +114,19 @@ async def plate(name_cam: str = Form(""), image: UploadFile = File(None)):
         if plate is None: 
             return jsonable_encoder({
                 "code": 201,
-                "error_code": 4,
+                "error_code": 3,
                 "msg": "Plate not found"
             }) 
 
         plate_text = read_plate(plate, ocr)
+        if plate_text is None:
+            return jsonable_encoder({
+                "code": 201,
+                "error_code": 4,
+                "msg": "Plate not recognize" # NEED MODIFY
+            })
+            
+        print(plate_text)
 
         return jsonable_encoder({
             "code": 200,

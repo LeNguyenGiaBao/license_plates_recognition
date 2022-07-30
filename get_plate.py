@@ -18,7 +18,10 @@ if IS_SAVE_PLATE:
     dir_path = r'D:\ParkingAppData\{}\plate_image'.format(today)
 
     if not os.path.exists(dir_path): 
-        os.mkdir(dir_path)
+        try:
+            os.mkdir(dir_path)
+        except:
+            pass
 
 
 def get_plate(image, compiled_model, input_layer_ir):
